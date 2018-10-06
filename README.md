@@ -5,11 +5,9 @@ Use Deep-Q-Network to solve Unity "Banana Collector" game.
 
 The goal of this game is to control an agent to collect **yello banana** and **aviod purple** banana.
 
-The state space has 37 dimensions and contains the agent's velocity, along with ray-based perception of objects around the agent's forward direction. Given this information, the agent has to learn how to best select actions. Four discrete actions are available, corresponding to:
-
 * State: 37 dimensions
   * Contains the agent's velocity, along with ray-based perception of objects around the agent's forward direction.
-* Action: 4 types of actions
+* Action: 4 discrete actions
   * 0: move forward
   * 1: move backward
   * 2: turn left
