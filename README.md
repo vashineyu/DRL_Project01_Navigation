@@ -19,8 +19,8 @@ The goal of this game is to control an agent to collect **yello banana** and **a
 ### Project basic requirement: +13 on average
 
 ## Run
-1. To reproduce the result, run [Navigation.ipynb](./Navigation.ipynb)
-2. To see the pretrained network's performance, run [Performance_Check.ipynb](./Performance_Check.ipynb)
+1. To reproduce the result, run `python Navigation.py --numbers_of_episode 2500` or see [Navigation.ipynb](./Navigation.ipynb)
+2. To see the pretrained network's performance, run `python Performance_Check.py`
 3. Model related hyper-parameters were kept in [dgn_agent.py](./dqn_agent.py)
 4. Network architecture were kept in [model.py](./model.py)
 
