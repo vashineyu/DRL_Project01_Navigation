@@ -3,7 +3,8 @@ import numpy as np
 
 class QNetwork():
     """Actor (Policy) Model."""
-    def __init__(self, state_size, action_size, optimizer, gamma = 0.9, seed = 42, minibatch_size = 64, tau = 1e-3):
+    def __init__(self, state_size, action_size, optimizer, gamma = 0.9, seed = 42, minibatch_size = 64, tau = 1e-3,
+                neurons_of_layers = [64,64], with_bn = False):
         """Initialize parameters and build model.
         Params
         ======
@@ -15,12 +16,15 @@ class QNetwork():
         self.state_size = state_size
         self.action_size = action_size
         self.gamma = gamma
+        self.neurons_of_layers = neurons_of_layers
+        self.with_bn = with_bn
 
         print("State size: %i" % self.state_size)
         print("Action size: %i" % self.action_size)
         # Initalize
         tf.reset_default_graph()
         self.sess = tf.Session() # Prepare a tensorflow sesion
+        print(state_size)
 
         # Prepared placeholders
         self.state = tf.placeholder(shape = [None, self.state_size], dtype = tf.float32) # input: S
@@ -32,16 +36,15 @@ class QNetwork():
 
         # Build networks
         with tf.variable_scope("Qtable"):
-            neurons_of_layers = [64, 64]
             # Use to update/train the agent's brain
             # Used to get Q(s, a)
             self.q_local = self._build_model(x = self.state, 
-                                             neurons_of_layers = neurons_of_layers, 
+                                             neurons_of_layers = self.neurons_of_layers, 
                                              scope = 'local', trainable = True)
 
             # with fixed parameters, used to get Q(s', a)
             self.q_target = self._build_model(x = self.next_state, 
-                                              neurons_of_layers = neurons_of_layers, 
+                                              neurons_of_layers = self.neurons_of_layers, 
                                               scope = 'target', trainable = False)
         
         # Handlers of parameters
@@ -55,8 +58,8 @@ class QNetwork():
                                                                       
         self.loss = tf.reduce_mean(tf.square(targets - estimated))
         
-        #with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
-        self.update_ops = optimizer.minimize(self.loss)
+        with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+            self.update_ops = optimizer.minimize(self.loss)
 
         # Finally, initalize weights
         self.saver = tf.train.Saver()
@@ -75,6 +78,8 @@ class QNetwork():
         def mlp_block(x, name, units, activation, trainable = True):
             with tf.variable_scope(name):
                 x = tf.layers.dense(x, units = units, trainable = trainable)
+                if self.with_bn:
+                    x = tf.layers.batch_normalization(x)
                 x = activation(x)
             return x
             

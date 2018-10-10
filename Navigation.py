@@ -13,19 +13,22 @@
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--numbers_of_episode', default = 2000, type = int)
+parser.add_argument('--numbers_of_stack_states', default = 0, type = int)
 parser.add_argument('--training_mode', default = 1, type = int)
 parser.add_argument('--model_name', default = './model_checkpoints/model.ckpt', type = str)
+parser.add_argument('--message', default = None, type = str)
+parser.add_argument('--use_gpu', default = 0, type = int)
 FLAGS = parser.parse_args()
 
 print("RUN IT")
 import pip
-pip.main(['-q', 'install', './python'])
+pip.main(['-q', 'install', './python', '--user'])
 
 from unityagents import UnityEnvironment
 import numpy as np
 
 # please do not modify the line below
-env = UnityEnvironment(file_name="/data/Banana_Linux_NoVis/Banana.x86_64")
+env = UnityEnvironment(file_name="./Banana_Linux_NoVis/Banana.x86_64")
 # Environments contain **_brains_** which are responsible for deciding the actions of their associated agents. Here we check for the first brain available, and set it as the default brain we will be controlling from Python.
 
 # get the default brain
@@ -90,9 +93,15 @@ import os
 
 # if in gpu_mode, setup visible gpu device
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+if FLAGS.use_gpu:
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+else:
+    os.environ['CUDA_VISIBLE_DEVICES'] = ""
 import tensorflow as tf
-agent = Agent(state_size=state_size, action_size=action_size, seed=0)
+use_stack_state = True if FLAGS.numbers_of_stack_states != 0 else False
+agent = Agent(state_size=state_size * FLAGS.numbers_of_stack_states if use_stack_state else state_size,
+              action_size=action_size, seed=0)
+
 
 def dqn(brain_name,
         n_episodes = 2500, max_t = 1000, eps_start = 1.0, eps_end = 0.01, eps_decay = 0.995, stop_score = 100.0):
@@ -103,15 +112,28 @@ def dqn(brain_name,
     
     for i_episode in range(1, n_episodes + 1):
         env_info = env.reset(train_mode=True)[brain_name] # reset the environment
+        if use_stack_state:
+            stack_state = deque(maxlen = FLAGS.numbers_of_stack_states)
+            next_stack_state = deque(maxlen = FLAGS.numbers_of_stack_states)
+            for _ in range(FLAGS.numbers_of_stack_states-1):
+                stack_state.append(np.zeros(state_size))
+                next_stack_state.append(np.zeros(state_size))
         state = env_info.vector_observations[0]            # get the current state
         score = 0
         for t in range(max_t):
+            if use_stack_state:
+                stack_state.append(state)
+                state = np.array(stack_state).ravel()
             action = agent.act(state, eps)        # select an action
             env_info = env.step(action)[brain_name]        # send the action to the environment
             next_state = env_info.vector_observations[0]   # get the next state
             reward = env_info.rewards[0]                   # get the reward
             done = env_info.local_done[0]                  # see if episode has finished
-            agent.step(state, action, reward, next_state, done)
+            
+            if use_stack_state:
+                next_stack_state.append(next_state)
+                
+            agent.step(state, action, reward, next_state if not use_stack_state else np.array(next_stack_state).ravel(), done)
             state = next_state
             score += reward
             if done:
@@ -126,17 +148,28 @@ def dqn(brain_name,
             print('\rEpisode {}\tAverage Score: {:.2f}, mean steps to done: {:.2f}'.format(i_episode, np.mean(scores_window),np.mean(total_steps)))
         if np.mean(scores_window)>= stop_score:
             print('\nEnvironment solved in {:d} episodes!\tAverage Score: {:.2f}'.format(i_episode-100, np.mean(scores_window)))
-            #torch.save(agent.qnetwork_local.state_dict(), 'checkpoint.pth')
-            agent.Qnetwork.save_model(model_name = './model_checkpoints/bst_model.ckpt')
+            if FLAGS.message is None:
+                model_name = './model_checkpoints/bst_model.ckpt'
+            else:
+                model_name = './model_checkpoints/bst_model_' + FLAGS.message + '.ckpt'
+            agent.Qnetwork.save_model(model_name = model_name)
             break
-    agent.Qnetwork.save_model(model_name = './model_checkpoints/model.ckpt')
+    if FLAGS.message is None:
+        model_name = './model_checkpoints/model.ckpt'
+    else:
+        model_name = './model_checkpoints/model_' + FLAGS.message + '.ckpt'
+    agent.Qnetwork.save_model(model_name = model_name)
     return scores
 
 import pandas as pd
 if FLAGS.training_mode:
     scores = dqn(brain_name = brain_name, n_episodes = FLAGS.numbers_of_episode)
     result = pd.DataFrame({'score':scores})
-    result.to_csv('./result_log/result.csv')
+    if FLAGS.message is None:
+        result_name = './result_log/result.csv'
+    else:
+        result_name = './result_log/result_' + FLAGS.message + '.csv'
+    result.to_csv(result_name)
 
     ## =========== ##
     #Plot it
@@ -160,11 +193,17 @@ if FLAGS.training_mode:
     plt.xlabel('Episode')
     plt.ylabel('Total Reward')
     plt.grid()
-    plt.savefig("./img/mean_collected_reward.png")
+    if FLAGS.message is None:
+        plt_name = './img/mean_collected_reward.png'
+    else:
+        plt_name = './img/mean_collected_reward_' + FLAGS.message + '.png'
+    plt.savefig(plt_name)
 
 # ### Test The Agent!
-agent = Agent(state_size=state_size, action_size=action_size, seed = 0)
-agent.Qnetwork.load_model(model_name = FLAGS.model_name)
+if not FLAGS.training_mode:
+    agent = Agent(state_size=state_size * FLAGS.numbers_of_stack_states if use_stack_state else state_size,
+                  action_size=action_size, seed=0)
+    agent.Qnetwork.load_model(model_name = FLAGS.model_name)
 
 env_info = env.reset(train_mode=False)[brain_name] # reset the environment
 state = env_info.vector_observations[0]            # get the current state

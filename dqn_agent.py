@@ -8,11 +8,13 @@ from model import QNetwork
 import tensorflow as tf
 
 BUFFER_SIZE = int(1e5)  # replay buffer size
-BATCH_SIZE = 64         # minibatch size
+BATCH_SIZE = 512         # minibatch size
 GAMMA = 0.99            # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR = 5e-4               # learning rate 
 UPDATE_EVERY = 25        # how often to update the network
+NEURONS_OF_LAYERS = [64, 64]
+WITH_BN = False
 
 class Agent():
     """Interacts with and learns from the environment."""
@@ -32,10 +34,12 @@ class Agent():
         # Q-Network
         #optimizer = tf.train.RMSPropOptimizer(learning_rate= LR)
         optimizer = tf.train.AdamOptimizer(learning_rate = LR)
-        self.Qnetwork = QNetwork(state_size = state_size, 
+        self.Qnetwork = QNetwork(state_size = state_size,
                                  action_size = action_size, 
                                  optimizer = optimizer,
-                                 gamma=GAMMA, tau = TAU, minibatch_size = BATCH_SIZE)
+                                 gamma=GAMMA, tau = TAU, minibatch_size = BATCH_SIZE,
+                                 neurons_of_layers = NEURONS_OF_LAYERS,
+                                 with_bn = WITH_BN)
         # Replay memory
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, seed)
         # Initialize time step (for updating every UPDATE_EVERY steps)
