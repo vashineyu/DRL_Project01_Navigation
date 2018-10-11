@@ -2,6 +2,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--numbers_of_round', default = 5, type = int)
 parser.add_argument('--model_name', default = './model_checkpoints/model.ckpt', type = str)
+parser.add_argument('--use_gpu', default = 0, type = int)
 FLAGS = parser.parse_args()
 
 print("RUN IT")
@@ -11,7 +12,7 @@ pip.main(['-q', 'install', './python'])
 from unityagents import UnityEnvironment
 import numpy as np
 # please do not modify the line below
-env = UnityEnvironment(file_name="/data/Banana_Linux_NoVis/Banana.x86_64")
+env = UnityEnvironment(file_name="./Banana_Linux_NoVis/Banana.x86_64")
 
 # get the default brain
 brain_name = env.brain_names[0]
@@ -37,6 +38,12 @@ from tqdm import tqdm
 from collections import deque
 import os
 import tensorflow as tf
+
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+if FLAGS.use_gpu:
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+else:
+    os.environ['CUDA_VISIBLE_DEVICES'] = ""
 
 agent = Agent(state_size=state_size, action_size=action_size, seed=0)
 agent.Qnetwork.load_model(model_name = FLAGS.model_name)

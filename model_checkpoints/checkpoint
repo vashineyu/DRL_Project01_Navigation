@@ -1,2 +1,2 @@
-model_checkpoint_path: "model_largebatch+stack2.ckpt"
-all_model_checkpoint_paths: "model_largebatch+stack2.ckpt"
+model_checkpoint_path: "model_standard.ckpt"
+all_model_checkpoint_paths: "model_standard.ckpt"
