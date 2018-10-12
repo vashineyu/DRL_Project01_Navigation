@@ -19,7 +19,7 @@ The goal of this game is to control an agent to collect **yello banana** and **a
 ### Project basic requirement: +13 on average
 
 ## Run
-1. To reproduce the result, run `python Navigation.py --numbers_of_episode 2500` or see [Navigation.ipynb](./Navigation.ipynb)
+1. To reproduce the result, run `python Navigation.py --numbers_of_episode 2500` or see [Navigation.py](./Navigation.py)
 2. To see the pretrained network's performance, run `python Performance_Check.py`
 3. Model related hyper-parameters were kept in [dgn_agent.py](./dqn_agent.py)
 4. Network architecture were kept in [model.py](./model.py)
@@ -29,7 +29,7 @@ Framework: Tensorflow v1.8  <br>
 Basic model: 2 layers multi-layer perceptron (MLP). <br>
 Optimizer: Adam (with learning rate = 5e-4) <br>
 #### A little modification of the code is that I trained the model for every single step. (the original code is controlled by "UPDATE_EVERY"). And the soft-updated (switch target-network's parameter) will be executed by "UPDATE_EVERY"
-For more deatils, please see [implementation_and_result.pdf](./inplementation_and_result.pdf)
+For more deatils, please see [implementation_and_result.pdf](./implementation_and_result.pdf)
 
 ## Result
 ![result_mean_cumulative_reward](./img/mean_collected_reward.png)
