@@ -13,8 +13,8 @@ GAMMA = 0.99            # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR = 5e-4               # learning rate 
 UPDATE_EVERY = 25        # how often to update the network
-NEURONS_OF_LAYERS = [64, 64]
-WITH_BN = False
+NEURONS_OF_LAYERS = [64, 64, 64, 64, 64, 64, 64, 64, 64, 64]
+WITH_BN = True
 
 class Agent():
     """Interacts with and learns from the environment."""
