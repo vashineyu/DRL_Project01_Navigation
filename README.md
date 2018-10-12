@@ -33,6 +33,4 @@ For more deatils, please see [implementation_and_result.pdf](./implementation_an
 
 ## Result
 ![result_mean_cumulative_reward](./img/mean_collected_reward.png)
-
-## Future work / Ideas
-
+![result_moving_average_of_all_conditions](./img/plot_avg.png)
