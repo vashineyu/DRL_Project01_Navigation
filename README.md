@@ -25,7 +25,6 @@ The goal of this game is to control an agent to collect **yello banana** and **a
 4. Network architecture were kept in [model.py](./model.py)
 
 ## Implementation details
-Framework: Tensorflow v1.8  <br>
 Basic model: 2 layers multi-layer perceptron (MLP). <br>
 Optimizer: Adam (with learning rate = 5e-4) <br>
 #### A little modification of the code is that I trained the model for every single step. (the original code is controlled by "UPDATE_EVERY"). And the soft-updated (switch target-network's parameter) will be executed by "UPDATE_EVERY"
@@ -35,4 +34,5 @@ For more deatils, please see [implementation_and_result.pdf](./implementation_an
 ![result_mean_cumulative_reward](./img/mean_collected_reward.png)
 
 ## Future work / Ideas
-
+1. priority sampling
+2. deal the problem with policy method
