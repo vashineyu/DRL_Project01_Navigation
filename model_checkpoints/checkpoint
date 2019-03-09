@@ -1,2 +1,2 @@
-model_checkpoint_path: "model_largebatch+deeeeeeeeper+bn.ckpt"
-all_model_checkpoint_paths: "model_largebatch+deeeeeeeeper+bn.ckpt"
+model_checkpoint_path: "model.ckpt"
+all_model_checkpoint_paths: "model.ckpt"
